@@ -81,10 +81,10 @@ const renderOperation: TableColumnRender<HdfsFile> = (
   )
 
   return (
-    <Popover content={content}>
+    <Popover className="popover" content={content}>
       <MoreVertical className="cursor-pointer" />
-      <style>{`
-      .tooltip-content .inner {
+      <style scoped>{`
+      .popover .tooltip-content .inner {
           padding: 0.25rem 0 !important;
         }
       `}</style>

@@ -5,6 +5,7 @@ import FilesTable from '../components/FileTable'
 import { usePathQuery } from '../utils/path'
 import Upload from 'rc-upload'
 import UploadFile from '../components/UploadFile'
+import CreateDirectory from '../components/CreateDirectory'
 
 const Home = () => {
   const [hash, setHash] = useHash()
@@ -23,7 +24,10 @@ const Home = () => {
     <div>
       <div className="flex justify-between mb-8">
         <h1 className="text-2xl">我的文件</h1>
-        <UploadFile />
+        <div className="space-x-4">
+          <UploadFile />
+          <CreateDirectory />
+        </div>
       </div>
       <FilesTable data={files} updatePath={updatePath} />
       {isLoading ? <Loading className="!mt-12" /> : null}

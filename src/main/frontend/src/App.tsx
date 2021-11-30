@@ -1,17 +1,20 @@
-import React from 'react'
-import Home from './pages/Home'
-import Header from './views/Header'
-import Navigation from './views/Navigation'
+import * as React from 'react'
+import FullScreenSpin from './components/FullScreenSpin'
+import { useAuth } from './context/auth-context'
+
+const AuthenticatedApp = React.lazy(
+  () => import(/* webpackPrefetch: true */ './AuthenticatedApp')
+)
+const UnauthenticatedApp = React.lazy(
+  () => import('./UnauthenticatedApp')
+)
 
 function App() {
+  const { user } = useAuth()
   return (
-    <div className="app">
-      <Header />
-      <Navigation />
-      <div className="container mx-auto">
-        <Home />
-      </div>
-    </div>
+    <React.Suspense fallback={<FullScreenSpin />}>
+      {user ? <AuthenticatedApp /> : <UnauthenticatedApp />}
+    </React.Suspense>
   )
 }
 

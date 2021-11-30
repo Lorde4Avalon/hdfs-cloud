@@ -1852,6 +1852,13 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-query@^1.2.9":
+  version "1.2.9"
+  resolved "https://registry.npmmirror.com/@types/react-query/download/@types/react-query-1.2.9.tgz#61df5a0594ea4b90234f9c0fdd8f12a06e331fed"
+  integrity sha1-Yd9aBZTqS5AjT5wP3Y8SoG4zH+0=
+  dependencies:
+    react-query "*"
+
 "@types/react@*", "@types/react@^17.0.37":
   version "17.0.37"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.37.tgz#6884d0aa402605935c397ae689deed115caad959"
@@ -9931,6 +9938,15 @@ react-is@^17.0.1:
   version "17.0.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.1.tgz#5b3531bd76a645a4c9fb6e693ed36419e3301339"
   integrity sha512-NAnt2iGDXohE5LI7uBnLnqvLQMtzhkiAOLXTmv+qnF9Ky7xAPcX8Up/xWIhxvLVGJvuLiNc4xQLtuqDRzb4fSA==
+
+react-query@*:
+  version "3.33.7"
+  resolved "https://registry.npmmirror.com/react-query/download/react-query-3.33.7.tgz#6ab1b2cb39e2e925a4fc44e8a269c7691e7eb2f3"
+  integrity sha512-uL/1ZatxcRyvfhbNPeuOlLVbcdMQKzQ2t+SQLJMrMM0plfa/Al3buaPbGsbsmIwvyWeI4CVkkSBKzQIkU4p9MQ==
+  dependencies:
+    "@babel/runtime" "^7.5.5"
+    broadcast-channel "^3.4.1"
+    match-sorter "^6.0.2"
 
 react-query@^3.33.6:
   version "3.33.6"

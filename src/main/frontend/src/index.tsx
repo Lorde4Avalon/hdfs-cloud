@@ -3,19 +3,13 @@ import ReactDOM from 'react-dom'
 import './styles/index.css'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
-import { GeistProvider } from '@geist-ui/react'
-import { QueryClient, QueryClientProvider } from 'react-query'
-
-const queryClient = new QueryClient()
+import { AppProviders } from './context'
+import UnauthenticatedApp from './UnauthenticatedApp'
 
 ReactDOM.render(
-  <React.StrictMode>
-    <GeistProvider>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    </GeistProvider>
-  </React.StrictMode>,
+  <AppProviders>
+    <App />
+  </AppProviders>,
   document.getElementById('root')
 )
 
