@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class HdfsService {
 
-    private final String HDFS_PATH = "hdfs://192.168.2.145:9000/es/";
+    private final String HDFS_PATH = "hdfs://localhost:9000/es/";
+    private final String HDFS_USER = "fronz";
 
 
     /**
@@ -28,7 +29,7 @@ public class HdfsService {
      */
     public void copyFile(String src, String dst) throws IOException {
         dst = HDFS_PATH + dst;
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", HDFS_USER);
         Configuration conf = new Configuration();
         FileSystem fs = FileSystem.get(URI.create(dst), conf);
         fs.copyFromLocalFile(new Path(src), new Path(dst));
@@ -44,7 +45,7 @@ public class HdfsService {
      */
     public void deleteFile(String dst) throws IOException {
         dst = HDFS_PATH + dst;
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", HDFS_USER);
         Configuration conf = new Configuration();
         try {
             FileSystem fs = FileSystem.get(URI.create(dst), conf);
@@ -64,7 +65,7 @@ public class HdfsService {
      */
     public void createDir(String dir) throws IOException {
         dir = HDFS_PATH + dir;
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", HDFS_USER);
         Configuration conf = new Configuration();
         FileSystem fs = FileSystem.get(URI.create(dir), conf);
         try {
@@ -88,7 +89,7 @@ public class HdfsService {
      */
     public FileStatus[] getDirectory(String dst) throws FileNotFoundException, IOException {
         dst = HDFS_PATH + dst;
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", HDFS_USER);
         Configuration conf = new Configuration();
         FileSystem fs = FileSystem.get(URI.create(dst), conf);
         FileStatus[] list = null;
@@ -116,7 +117,7 @@ public class HdfsService {
      */
     public InputStream getFileInputStream(String filePath) throws IOException {
         filePath = HDFS_PATH + filePath;
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", HDFS_USER);
         Configuration conf = new Configuration();
         conf.set("fs.default.name", filePath);
         FileSystem fs = FileSystem.get(conf);
@@ -131,7 +132,7 @@ public class HdfsService {
      * @throws IOException
      */
     public void renameFile(String filePath, String newName) throws IOException {
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", HDFS_USER);
         Configuration conf = new Configuration();
         FileSystem fs = FileSystem.get(URI.create(HDFS_PATH + filePath), conf);
         try {
@@ -150,7 +151,7 @@ public class HdfsService {
      * @throws IOException
      */
     public void moveFile(String src, String dst) throws IOException {
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", HDFS_USER);
         Configuration conf = new Configuration();
         FileSystem fs = FileSystem.get(URI.create(HDFS_PATH + src), conf);
         try {

@@ -1,6 +1,7 @@
 import {
   Button,
   Link,
+  Modal,
   Popover,
   Spacer,
   Table,
@@ -14,6 +15,8 @@ import {
 import React from 'react'
 import { useHash } from 'react-use'
 import { formatTimestamp } from '../utils/misc'
+import DeleteFileModal from './DeleteFileModal'
+import RenameModal from './RenameModal'
 
 interface Props {
   data: HdfsFile[]
@@ -45,37 +48,34 @@ const renderName: TableColumnRender<HdfsFile> = (value, rowData) => {
 }
 
 const renderSize: TableColumnRender<HdfsFile> = (value, rowData) => {
-  console.log(value)
   if (rowData.operation === 'back') return
   if (!value) return <span>-</span>
   if (rowData.type === 'dir') return <span>-</span>
-  return <span>{value}</span>
+  value = parseInt(value.toString(), 10)
+  const size =
+    value / 1024 > 1024
+      ? (value / 1024 / 1024).toFixed(2) + 'MB'
+      : (value / 1024).toFixed(2) + 'KB'
+  return <span>{size}</span>
 }
 
-const renderOperation: TableColumnRender<HdfsFile> = (
+type RenderOperation = (
+  ...params: [...Parameters<TableColumnRender<HdfsFile>>, Operation[]]
+) => void | JSX.Element
+
+const renderOperation: RenderOperation = (
   value,
-  rowData
+  rowData,
+  rowIndex,
+  operations
 ) => {
   if (rowData.operation === 'back') return <span></span>
 
-  const operations = [
-    {
-      title: '重命名',
-      className: undefined,
-      fn: () => {},
-    },
-    {
-      title: '删除',
-      className: 'text-red-600',
-      fn: () => {},
-    },
-  ]
-
   const content = () => (
     <ul>
-      {operations.map(({ title, className, fn }) => (
+      {operations.map(({ title, className, onClick }) => (
         <li
-          onClick={fn}
+          onClick={onClick}
           key={title}
           className="text-[color:#444444] text-sm cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-[#fafafa]">
           <div className="flex items-center">
@@ -108,8 +108,14 @@ const FilesTable = ({ data, updatePath }: Props) => {
   const isHome = !hash || hash.substring(1) === '/'
   const {
     visible: renameModalVisible,
-    setVisible: setRenameModalVisbile,
+    setVisible: setRenameModalVisible,
     bindings: renameModalBindings,
+  } = useModal()
+
+  const {
+    visible: deleteModalVisible,
+    setVisible: setDeleteModalVisible,
+    bindings: deleteModalBindings,
   } = useModal()
 
   if (!data) data = []
@@ -142,6 +148,18 @@ const FilesTable = ({ data, updatePath }: Props) => {
     }
   }
 
+  const operations: Operation[] = [
+    {
+      title: '重命名',
+      onClick: () => setRenameModalVisible(true),
+    },
+    {
+      title: '删除',
+      className: 'text-red-600',
+      onClick: () => setDeleteModalVisible(true),
+    },
+  ]
+
   return (
     <>
       <Table
@@ -159,8 +177,23 @@ const FilesTable = ({ data, updatePath }: Props) => {
           render={renderTime}
         />
         <Table.Column prop="len" label="大小" render={renderSize} />
-        <Table.Column prop="operation" render={renderOperation} />
+        <Table.Column
+          prop="operation"
+          render={(value, rowData: HdfsFile, rowIndex) =>
+            renderOperation(value, rowData, rowIndex, operations)
+          }
+        />
       </Table>
+      <RenameModal
+        visible={renameModalVisible}
+        setVisible={setRenameModalVisible}
+        bindings={renameModalBindings}
+      />
+      <DeleteFileModal
+        visible={deleteModalVisible}
+        setVisible={setDeleteModalVisible}
+        bindings={deleteModalBindings}
+      />
     </>
   )
 }
