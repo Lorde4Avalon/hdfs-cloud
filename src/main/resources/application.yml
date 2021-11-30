@@ -1,0 +1,21 @@
+spring:
+  thymeleaf:
+    prefix: classpath:/static/
+    enabled: true
+
+  datasource:
+    url: jdbc:mysql://192.168.2.184:3306/hdfscloud
+    username: root
+    password: hellomysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+jasypt:
+  encryptor:
+    # 加密的盐值，为了安全，该配置可以放在启动参数或者命令行参数中
+    password: fa7bd4edd42448aea8c9484fbce6e8cd
+    # 加密所采用的算法
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+
+jwt:
+  secret: hellomysql

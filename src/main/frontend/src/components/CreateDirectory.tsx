@@ -52,17 +52,13 @@ function CreateDirectory() {
     }
   }
 
-  React.useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Enter') {
-        handleCreateDirectory()
-      }
+  function handleKeyDown(
+    e: Parameters<React.KeyboardEventHandler>[0]
+  ) {
+    if (e.key === 'Enter') {
+      handleCreateDirectory()
     }
-
-    document.addEventListener('keydown', handleKeyDown)
-
-    return document.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }
 
   return (
     <>
@@ -81,12 +77,15 @@ function CreateDirectory() {
             autoFocus
             width="100%"
             onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
         </Modal.Content>
         <Modal.Action passive onClick={() => setVisible(false)}>
           取消[ESC]
         </Modal.Action>
-        <Modal.Action onClick={handleCreateDirectory}>
+        <Modal.Action
+          loading={isLoading}
+          onClick={handleCreateDirectory}>
           确定[Enter]
         </Modal.Action>
       </Modal>

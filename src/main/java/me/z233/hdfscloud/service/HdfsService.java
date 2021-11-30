@@ -18,6 +18,7 @@ public class HdfsService {
 
     private final String HDFS_PATH = "hdfs://192.168.2.145:9000/es/";
 
+
     /**
      * 上传文件
      *

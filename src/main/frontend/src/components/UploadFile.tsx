@@ -3,7 +3,7 @@ import { UploadCloud } from '@geist-ui/react-icons'
 import Upload from 'rc-upload'
 import { useHash } from 'react-use'
 import { useAuth } from '../context/auth-context'
-import { client } from '../utils/api-client'
+import { client, queryClient } from '../utils/api-client'
 
 export default function UploadFile() {
   const { user } = useAuth()
@@ -17,7 +17,10 @@ export default function UploadFile() {
           hash.indexOf('/') === hash.lastIndexOf('/') ? 2 : 1,
           hash.lastIndexOf('/')
         )
-      }`}>
+      }`}
+      onSuccess={() => {
+        queryClient.invalidateQueries()
+      }}>
       <Tooltip text="上传文件">
         <Button icon={<UploadCloud />} auto />
       </Tooltip>
