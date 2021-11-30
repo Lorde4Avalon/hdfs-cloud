@@ -13,3 +13,9 @@ interface User {
   username: string
   token: string
 }
+
+interface Operation {
+  title: string
+  className?: string
+  onClick: () => void
+}

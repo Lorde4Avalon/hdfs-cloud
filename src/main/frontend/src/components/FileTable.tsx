@@ -1,4 +1,11 @@
-import { Button, Link, Popover, Spacer, Table } from '@geist-ui/react'
+import {
+  Button,
+  Link,
+  Popover,
+  Spacer,
+  Table,
+  useModal,
+} from '@geist-ui/react'
 import { File, Folder, MoreVertical } from '@geist-ui/react-icons'
 import {
   TableColumnRender,
@@ -48,6 +55,7 @@ const renderOperation: TableColumnRender<HdfsFile> = (
   rowData
 ) => {
   if (rowData.operation === 'back') return <span></span>
+
   const operations = [
     {
       title: '重命名',
@@ -65,6 +73,7 @@ const renderOperation: TableColumnRender<HdfsFile> = (
     <ul>
       {operations.map(({ title, className, fn }) => (
         <li
+        onClick={fn}
           key={title}
           className="text-[color:#444444] text-sm cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-[#fafafa]">
           <div className="flex items-center">
@@ -95,6 +104,12 @@ const renderOperation: TableColumnRender<HdfsFile> = (
 const FilesTable = ({ data, updatePath }: Props) => {
   const [hash, setHash] = useHash()
   const isHome = !hash || hash.substring(1) === '/'
+  const {
+    visible: renameModalVisible,
+    setVisible: setRenameModalVisbile,
+    bindings: renameModalBindings,
+  } = useModal()
+
   if (!data) data = []
   if (!isHome) {
     data = [
@@ -126,19 +141,25 @@ const FilesTable = ({ data, updatePath }: Props) => {
   }
 
   return (
-    <Table
-      data={data}
-      rowClassName={() => 'cursor-pointer'}
-      onRow={handleOnRowClick}>
-      <Table.Column prop="name" label="文件名" render={renderName} />
-      <Table.Column
-        prop="modTime"
-        label="最后修改时间"
-        render={renderTime}
-      />
-      <Table.Column prop="len" label="大小" render={renderSize} />
-      <Table.Column prop="operation" render={renderOperation} />
-    </Table>
+    <>
+      <Table
+        data={data}
+        rowClassName={() => 'cursor-pointer'}
+        onRow={handleOnRowClick}>
+        <Table.Column
+          prop="name"
+          label="文件名"
+          render={renderName}
+        />
+        <Table.Column
+          prop="modTime"
+          label="最后修改时间"
+          render={renderTime}
+        />
+        <Table.Column prop="len" label="大小" render={renderSize} />
+        <Table.Column prop="operation" render={renderOperation} />
+      </Table>
+    </>
   )
 }
 
