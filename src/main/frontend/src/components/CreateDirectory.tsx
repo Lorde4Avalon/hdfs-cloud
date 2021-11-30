@@ -7,11 +7,11 @@ import {
   useToasts,
 } from '@geist-ui/react'
 import { FolderPlus } from '@geist-ui/react-icons'
-import React from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { useHash } from 'react-use'
 import { useAuth } from '../context/auth-context'
 import { client, queryClient } from '../utils/api-client'
-import { useAsync, usePath } from '../utils/hooks'
+import { useAsync, useInputFocus, usePath } from '../utils/hooks'
 
 function CreateDirectory() {
   const { user } = useAuth()
@@ -43,6 +43,8 @@ function CreateDirectory() {
           type: 'success',
         })
         setVisible(false)
+      }).catch((e) => {
+        console.log(e)
       })
     } else {
       setToast({
@@ -74,7 +76,7 @@ function CreateDirectory() {
         <Modal.Subtitle>请输入文件夹名称</Modal.Subtitle>
         <Modal.Content>
           <Input
-            autoFocus
+            ref={useInputFocus()}
             width="100%"
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}

@@ -45,9 +45,11 @@ const renderName: TableColumnRender<HdfsFile> = (value, rowData) => {
 }
 
 const renderSize: TableColumnRender<HdfsFile> = (value, rowData) => {
+  console.log(value)
   if (rowData.operation === 'back') return
   if (!value) return <span>-</span>
   if (rowData.type === 'dir') return <span>-</span>
+  return <span>{value}</span>
 }
 
 const renderOperation: TableColumnRender<HdfsFile> = (
@@ -73,7 +75,7 @@ const renderOperation: TableColumnRender<HdfsFile> = (
     <ul>
       {operations.map(({ title, className, fn }) => (
         <li
-        onClick={fn}
+          onClick={fn}
           key={title}
           className="text-[color:#444444] text-sm cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-[#fafafa]">
           <div className="flex items-center">

@@ -67,7 +67,7 @@ public class HdfsController {
         val dst = params.get("dst");
 
         if (username == null && username.isEmpty()) {
-            return new ResponseEntity<>(MessageEntity.builder().text("目标文件夹不能为空"), null, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(MessageEntity.builder().text("未指定目标用户"), null, HttpStatus.FORBIDDEN);
         }
 
         if (dst == null && dst.isEmpty()) {
@@ -76,10 +76,10 @@ public class HdfsController {
 
         if (src != null && !src.isEmpty()) {
             hdfsService.moveFile(username + '/' + src, username + '/' + dst);
-            return new ResponseEntity<>(null, null, HttpStatus.OK);
+            return new ResponseEntity<>(MessageEntity.builder().text("ok").build(), HttpStatus.OK);
         } else {
             hdfsService.createDir(username + '/' + dst);
-            return new ResponseEntity<>(null, null, HttpStatus.OK);
+            return new ResponseEntity<>(MessageEntity.builder().text("ok").build(), HttpStatus.OK);
         }
     }
 
@@ -87,18 +87,26 @@ public class HdfsController {
     private String tempDir;
 
     @PostMapping(value = "/path", produces = "application/json")
-    public ResponseEntity<?> upload(String path, @RequestParam("file") MultipartFile file) throws IOException {
-        if (path == null) path = "/";
+    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file, @RequestParam("username") String username, @RequestParam("dst") String dst) throws IOException {
+
+        if (username == null && username.isEmpty()) {
+            return new ResponseEntity<>(MessageEntity.builder().text("未指定目标用户"), null, HttpStatus.FORBIDDEN);
+        }
+
+        if (dst == null && dst.isEmpty()) {
+            return new ResponseEntity<>(MessageEntity.builder().text("目标文件夹不能为空"), null, HttpStatus.FORBIDDEN);
+        }
+
         try {
             val fileName = file.getOriginalFilename();
             val realTempPath = servletContext.getRealPath("/" + fileName);
             val tempFile = new File(realTempPath);
             file.transferTo(tempFile);
-            hdfsService.copyFile(realTempPath, path + "/" + fileName);
-            return new ResponseEntity<>(null, null, HttpStatus.OK);
+            hdfsService.copyFile(realTempPath, "/" + username + "/" + dst + "/" + fileName);
+            return new ResponseEntity<>(MessageEntity.builder().text("ok").build(), HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(null, null, HttpStatus.OK);
+            return new ResponseEntity<>(MessageEntity.builder().text("ok").build(), HttpStatus.OK);
         }
     }
 

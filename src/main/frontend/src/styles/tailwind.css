@@ -13,3 +13,8 @@
 /* Stop purging. */
 
 /* Your own custom utilities */
+
+#geist-ui-tooltip .inner {
+  font-size: 0.875rem;
+  white-space: nowrap;
+}

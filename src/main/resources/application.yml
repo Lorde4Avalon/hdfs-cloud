@@ -9,6 +9,11 @@ spring:
     password: hellomysql
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  servlet:
+    multipart:
+      max-file-size: 128MB
+      max-request-size: 128MB
+
 
 jasypt:
   encryptor:

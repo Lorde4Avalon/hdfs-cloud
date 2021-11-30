@@ -2,7 +2,8 @@ import { Button, Card, Input, Modal, useModal } from '@geist-ui/react'
 import { Key, User } from '@geist-ui/react-icons'
 import logo from './logo.svg'
 import { useAuth } from './context/auth-context'
-import { useAsync } from './utils/hooks'
+import { useAsync, useInputFocus } from './utils/hooks'
+import React from 'react'
 
 function LoginForm({
   visible,
@@ -31,7 +32,7 @@ function LoginForm({
       <Modal.Content className="!px-12">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Input
-            autoFocus
+            ref={useInputFocus()}
             name="username"
             width="100%"
             icon={<User />}
@@ -90,7 +91,7 @@ function RegisterForm({
       <Modal.Content className="!px-12 !space-y-2">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Input
-            autoFocus
+            ref={useInputFocus()}
             name="username"
             width="100%"
             icon={<User />}

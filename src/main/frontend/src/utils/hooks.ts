@@ -1,6 +1,22 @@
 import React from 'react'
 import { useHash } from 'react-use'
 
+export function useInputFocus() {
+  const isFocus = React.useRef(false)
+  if (isFocus.current) isFocus.current = false
+  return React.useCallback(
+    (inputElement: HTMLElement | null) => {
+      if (!isFocus.current && inputElement) {
+        setTimeout(() => {
+          inputElement.focus()
+          isFocus.current = true
+        }, 100)
+      }
+    },
+    []
+  )
+}
+
 export function usePath() {
   const [hash] = useHash()
   const path = hash ? hash.substring(1) : '/'
