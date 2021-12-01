@@ -32,7 +32,16 @@ export async function client(
   return window
     .fetch(`${BASE_URL}/${endpoint}`, config)
     .then(async (response) => {
-      const data = await response.json()
+      let data = null
+      if (
+        response.headers
+          .get('Content-Type')
+          ?.includes('application/octet-stream')
+      ) {
+        data = await response.blob()
+      } else {
+        data = await response.json()
+      }
       if (response.ok) {
         return data
       } else {

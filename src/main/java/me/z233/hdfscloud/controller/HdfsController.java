@@ -3,6 +3,8 @@ package me.z233.hdfscloud.controller;
 import me.z233.hdfscloud.entity.MessageEntity;
 import me.z233.hdfscloud.service.HdfsService;
 import me.z233.hdfscloud.entity.HdfsFileEntity;
+import me.z233.hdfscloud.service.UserService;
+import me.z233.hdfscloud.util.CookieUtil;
 import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,8 +15,12 @@ import lombok.val;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -24,6 +30,9 @@ public class HdfsController {
 
     @Autowired
     private HdfsService hdfsService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private ServletContext servletContext;
@@ -51,13 +60,21 @@ public class HdfsController {
         }
     }
 
-    @RequestMapping(value = "/path/{path}", method = RequestMethod.DELETE, produces = "application/json")
-    public ResponseEntity<?> delete(@PathVariable String path) throws IOException {
-        if (path == null)
-            return new ResponseEntity<>("Destination is required.", null, HttpStatus.BAD_REQUEST);
+    @RequestMapping(value = "/path", method = RequestMethod.DELETE, produces = "application/json")
+    public ResponseEntity<?> delete(@RequestBody Map<String, String> params) throws IOException {
 
-        hdfsService.deleteFile(path);
-        return new ResponseEntity<>(null, null, HttpStatus.OK);
+        val username = params.get("username");
+        val dst = params.get("dst");
+
+        if (username == null && username.isEmpty()) {
+            return new ResponseEntity<>(MessageEntity.builder().text("未指定目标用户"), null, HttpStatus.FORBIDDEN);
+        }
+
+        if (dst == null && dst.isEmpty()) {
+            return new ResponseEntity<>(MessageEntity.builder().text("目标文件不能为空"), null, HttpStatus.FORBIDDEN);
+        }
+        hdfsService.deleteFile(username + '/' + dst);
+        return new ResponseEntity<>(MessageEntity.builder().text("ok").build(), null, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/path", method = RequestMethod.PUT, produces = "application/json")
@@ -98,7 +115,7 @@ public class HdfsController {
         }
 
         try {
-            val fileName = file.getOriginalFilename();
+            val fileName = file.getOriginalFilename().replace(" ", "_");
             val realTempPath = servletContext.getRealPath("/" + fileName);
             val tempFile = new File(realTempPath);
             file.transferTo(tempFile);
@@ -110,5 +127,43 @@ public class HdfsController {
         }
     }
 
+    @RequestMapping(value = "/download")
+    public ResponseEntity<?> download(String path   , HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (path == null || path.isEmpty()) {
+            return new ResponseEntity<>(MessageEntity.builder().text("文件路径不能为空"), null, HttpStatus.FORBIDDEN);
+        }
+
+        val token = CookieUtil.resolveCookie(request);
+        val user = userService.getUserByToken(token);
+
+        if (user == null) {
+            return new ResponseEntity<>(MessageEntity.builder().text("用户不存在"), null, HttpStatus.FORBIDDEN);
+        }
+
+        val username = user.getUsername();
+        response.reset();
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(path.substring(path.lastIndexOf("/") + 1), "UTF-8"));
+        response.setHeader("Content-Transfer-Encoding", "chunked");
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("application/octet-stream");
+
+        try {
+            val fileStream = hdfsService.getFileInputStream(username + '/' + path);
+            val outputStream = response.getOutputStream();
+            val buffer = new byte[1024];
+            var len = 0;
+            while ((len = fileStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, len);
+            }
+            outputStream.write(buffer);
+            outputStream.flush();
+            fileStream.close();
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(MessageEntity.builder().text("未知错误"), null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

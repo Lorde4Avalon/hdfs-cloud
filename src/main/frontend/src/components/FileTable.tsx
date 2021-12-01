@@ -1,12 +1,4 @@
-import {
-  Button,
-  Link,
-  Modal,
-  Popover,
-  Spacer,
-  Table,
-  useModal,
-} from '@geist-ui/react'
+import { Popover, Table, useModal } from '@geist-ui/react'
 import { File, Folder, MoreVertical } from '@geist-ui/react-icons'
 import {
   TableColumnRender,
@@ -14,7 +6,9 @@ import {
 } from '@geist-ui/react/dist/table/table-types'
 import React from 'react'
 import { useHash } from 'react-use'
+import { usePath } from '../utils/hooks'
 import { formatTimestamp } from '../utils/misc'
+import { downloadFile } from '../utils/path'
 import DeleteFileModal from './DeleteFileModal'
 import RenameModal from './RenameModal'
 
@@ -71,11 +65,11 @@ const renderOperation: RenderOperation = (
 ) => {
   if (rowData.operation === 'back') return <span></span>
 
-  const content = () => (
+  const popoverContent = () => (
     <ul>
       {operations.map(({ title, className, onClick }) => (
         <li
-          onClick={onClick}
+          onClick={() => onClick(rowData)}
           key={title}
           className="text-[color:#444444] text-sm cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-[#fafafa]">
           <div className="flex items-center">
@@ -92,7 +86,7 @@ const renderOperation: RenderOperation = (
   )
 
   return (
-    <Popover className="popover" content={content}>
+    <Popover className="popover" content={popoverContent}>
       <MoreVertical className="cursor-pointer" />
       <style scoped>{`
       .popover .tooltip-content .inner {
@@ -111,12 +105,17 @@ const FilesTable = ({ data, updatePath }: Props) => {
     setVisible: setRenameModalVisible,
     bindings: renameModalBindings,
   } = useModal()
+  const [fileName, setFileName] = React.useState('')
+  const [path] = usePath()
 
   const {
     visible: deleteModalVisible,
     setVisible: setDeleteModalVisible,
     bindings: deleteModalBindings,
   } = useModal()
+
+  renameModalBindings.onClose = () => setFileName('')
+  deleteModalBindings.onClose = () => setFileName('')
 
   if (!data) data = []
   if (!isHome) {
@@ -150,13 +149,25 @@ const FilesTable = ({ data, updatePath }: Props) => {
 
   const operations: Operation[] = [
     {
+      title: '下载',
+      onClick: (rowData: HdfsFile) => {
+        downloadFile(path + '/' + rowData.name)
+      },
+    },
+    {
       title: '重命名',
-      onClick: () => setRenameModalVisible(true),
+      onClick: (rowData: HdfsFile) => {
+        setFileName(rowData.name)
+        setRenameModalVisible(true)
+      },
     },
     {
       title: '删除',
       className: 'text-red-600',
-      onClick: () => setDeleteModalVisible(true),
+      onClick: (rowData: HdfsFile) => {
+        setFileName(rowData.name)
+        setDeleteModalVisible(true)
+      },
     },
   ]
 
@@ -188,11 +199,13 @@ const FilesTable = ({ data, updatePath }: Props) => {
         visible={renameModalVisible}
         setVisible={setRenameModalVisible}
         bindings={renameModalBindings}
+        fileName={fileName}
       />
       <DeleteFileModal
         visible={deleteModalVisible}
         setVisible={setDeleteModalVisible}
         bindings={deleteModalBindings}
+        fileName={fileName}
       />
     </>
   )

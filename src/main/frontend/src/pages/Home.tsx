@@ -1,9 +1,8 @@
-import { Button, Loading } from '@geist-ui/react'
-import React, { useEffect, useLayoutEffect } from 'react'
+import { Loading } from '@geist-ui/react'
+import React from 'react'
 import { useHash } from 'react-use'
 import FilesTable from '../components/FileTable'
 import { usePathQuery } from '../utils/path'
-import Upload from 'rc-upload'
 import UploadFile from '../components/UploadFile'
 import CreateDirectory from '../components/CreateDirectory'
 

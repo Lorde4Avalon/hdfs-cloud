@@ -17,5 +17,12 @@ interface User {
 interface Operation {
   title: string
   className?: string
-  onClick: () => void
+  onClick: (...args: any) => void
+}
+
+type OperationModalProps = Omit<
+  ReturnType<typeof useModal>,
+  'currentRef'
+> & {
+  fileName: HdfsFile['name']
 }
