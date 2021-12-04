@@ -3,10 +3,26 @@ import { useHash } from 'react-use'
 
 export function useInputFocus() {
   const isFocus = React.useRef(false)
+  const element = React.useRef<HTMLElement | null>(null)
   if (isFocus.current) isFocus.current = false
-  return React.useCallback(
+  const focusOnInput = () => {
+    if (element.current) {
+      element.current.focus()
+    }
+  }
+
+  const clearInput = () => {
+    if (element.current instanceof HTMLInputElement) {
+      element.current.value = ''
+    } else {
+      throw new Error('Element is not an input')
+    }
+  }
+
+  const autoFocusRef = React.useCallback(
     (inputElement: HTMLElement | null) => {
       if (!isFocus.current && inputElement) {
+        element.current = inputElement
         setTimeout(() => {
           inputElement.focus()
           isFocus.current = true
@@ -15,12 +31,21 @@ export function useInputFocus() {
     },
     []
   )
+
+  return {
+    focusOnInput,
+    autoFocusRef,
+    clearInput,
+  }
 }
 
 export function usePath() {
-  const [hash] = useHash()
+  const [hash, setHash] = useHash()
   const path = hash ? hash.substring(1) : '/'
-  return [path]
+  function setPath(newPath: string) {
+    setHash(newPath)
+  }
+  return [path, setPath] as const
 }
 
 export function useSafeDispatch(dispatch: Function) {

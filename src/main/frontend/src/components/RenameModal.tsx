@@ -39,10 +39,17 @@ function RenameModal({
   fileName,
 }: OperationModalProps) {
   const [text, setText] = React.useState('')
-  const { run, isLoading } = useAsync()
-  const [toasts, setToast] = useToasts()
+  const { run } = useAsync()
+  const [, setToast] = useToasts()
   const { user } = useAuth()
   const [path] = usePath()
+  const { autoFocusRef } = useInputFocus()
+
+  React.useEffect(() => {
+    if (visible) {
+      setText(fileName)
+    }
+  }, [fileName, visible])
 
   function handleOnClick() {
     if (text.trim().length === 0) {
@@ -90,7 +97,8 @@ function RenameModal({
       <Modal.Subtitle>输入新名称</Modal.Subtitle>
       <Modal.Content>
         <Input
-          ref={useInputFocus()}
+          value={text}
+          ref={autoFocusRef}
           width="100%"
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}

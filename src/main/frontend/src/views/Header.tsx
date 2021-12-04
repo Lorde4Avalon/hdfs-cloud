@@ -22,7 +22,8 @@ const Header = () => {
           <li
             onClick={fn}
             key={title}
-            className="text-[color:#444444] text-sm cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-[#fafafa]">
+            className="text-[color:#444444] text-sm cursor-pointer 
+            select-none relative py-2 pl-3 pr-9 hover:bg-[#fafafa]">
             <div className="flex items-center">
               <span
                 className={`block truncate ${

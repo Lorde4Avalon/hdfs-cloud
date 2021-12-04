@@ -1,5 +1,5 @@
-import { Popover, Table, useModal } from '@geist-ui/react'
-import { File, Folder, MoreVertical } from '@geist-ui/react-icons'
+import { Table, useModal } from '@geist-ui/react'
+import { File, Folder } from '@geist-ui/react-icons'
 import {
   TableColumnRender,
   TableOnRowClick,
@@ -10,11 +10,12 @@ import { usePath } from '../utils/hooks'
 import { formatTimestamp } from '../utils/misc'
 import { downloadFile } from '../utils/path'
 import DeleteFileModal from './DeleteFileModal'
+import FileOperationsPopover from './FileOperationsPopover'
+import MoveDrawer from './MoveDrawer'
 import RenameModal from './RenameModal'
 
 interface Props {
   data: HdfsFile[]
-  updatePath: (path: string) => void
 }
 
 const renderTime: TableColumnRender<HdfsFile> = (value, rowData) => {
@@ -65,40 +66,13 @@ const renderOperation: RenderOperation = (
 ) => {
   if (rowData.operation === 'back') return <span></span>
 
-  const popoverContent = () => (
-    <ul>
-      {operations.map(({ title, className, onClick }) => (
-        <li
-          onClick={() => onClick(rowData)}
-          key={title}
-          className="text-[color:#444444] text-sm cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-[#fafafa]">
-          <div className="flex items-center">
-            <span
-              className={`block truncate ${
-                className ? className : ''
-              }`}>
-              {title}
-            </span>
-          </div>
-        </li>
-      ))}
-    </ul>
-  )
-
   return (
-    <Popover className="popover" content={popoverContent}>
-      <MoreVertical className="cursor-pointer" />
-      <style scoped>{`
-      .popover .tooltip-content .inner {
-          padding: 0.25rem 0 !important;
-        }
-      `}</style>
-    </Popover>
+    <FileOperationsPopover operations={operations} file={rowData} />
   )
 }
 
-const FilesTable = ({ data, updatePath }: Props) => {
-  const [hash, setHash] = useHash()
+const FilesTable = ({ data }: Props) => {
+  const [hash] = useHash()
   const isHome = !hash || hash.substring(1) === '/'
   const {
     visible: renameModalVisible,
@@ -106,7 +80,7 @@ const FilesTable = ({ data, updatePath }: Props) => {
     bindings: renameModalBindings,
   } = useModal()
   const [fileName, setFileName] = React.useState('')
-  const [path] = usePath()
+  const [path, setPath] = usePath()
 
   const {
     visible: deleteModalVisible,
@@ -114,8 +88,12 @@ const FilesTable = ({ data, updatePath }: Props) => {
     bindings: deleteModalBindings,
   } = useModal()
 
-  renameModalBindings.onClose = () => setFileName('')
-  deleteModalBindings.onClose = () => setFileName('')
+  renameModalBindings.onClose = () => (
+    setFileName(''), setRenameModalVisible(false)
+  )
+  deleteModalBindings.onClose = () => (
+    setFileName(''), setDeleteModalVisible(false)
+  )
 
   if (!data) data = []
   if (!isHome) {
@@ -126,6 +104,7 @@ const FilesTable = ({ data, updatePath }: Props) => {
         modTime: 0,
         type: 'dir',
         operation: 'back',
+        path: ''
       },
       ...data,
     ]
@@ -135,7 +114,7 @@ const FilesTable = ({ data, updatePath }: Props) => {
     index
   ) => {
     if (rowData.operation === 'back') {
-      updatePath(
+      setPath(
         hash.substring(
           hash.indexOf('/') === hash.lastIndexOf('/') ? 2 : 1,
           hash.lastIndexOf('/')
@@ -143,32 +122,42 @@ const FilesTable = ({ data, updatePath }: Props) => {
       )
     }
     if (rowData.type === 'dir' && rowData.operation !== 'back') {
-      updatePath((hash ? hash.substring(1) : '') + '/' + rowData.name)
+      setPath((hash ? hash.substring(1) : '') + '/' + rowData.name)
     }
   }
 
-  const operations: Operation[] = [
-    {
-      title: '下载',
-      onClick: (rowData: HdfsFile) => {
-        downloadFile(path + '/' + rowData.name)
-      },
+  const downloadOperation: Operation = {
+    title: '下载',
+    onClick: (file: HdfsFile) => {
+      downloadFile(path + '/' + file.name)
     },
-    {
-      title: '重命名',
-      onClick: (rowData: HdfsFile) => {
-        setFileName(rowData.name)
-        setRenameModalVisible(true)
-      },
+  }
+
+  const renameOperation: Operation = {
+    title: '重命名',
+    onClick: (rowData: HdfsFile) => {
+      setFileName(rowData.name)
+      setRenameModalVisible(true)
     },
-    {
-      title: '删除',
-      className: 'text-red-600',
-      onClick: (rowData: HdfsFile) => {
-        setFileName(rowData.name)
-        setDeleteModalVisible(true)
-      },
+  }
+
+  const deleteOperation: Operation = {
+    title: '删除',
+    className: 'text-red-600',
+    onClick: (rowData: HdfsFile) => {
+      setFileName(rowData.name)
+      setDeleteModalVisible(true)
     },
+  }
+
+  const fileOperations: Operation[] = [
+    downloadOperation,
+    renameOperation,
+    deleteOperation,
+  ]
+  const dirOperations: Operation[] = [
+    renameOperation,
+    deleteOperation,
   ]
 
   return (
@@ -190,9 +179,25 @@ const FilesTable = ({ data, updatePath }: Props) => {
         <Table.Column prop="len" label="大小" render={renderSize} />
         <Table.Column
           prop="operation"
-          render={(value, rowData: HdfsFile, rowIndex) =>
-            renderOperation(value, rowData, rowIndex, operations)
-          }
+          render={(value, file: HdfsFile, rowIndex) => {
+            if (file.type === 'file') {
+              return renderOperation(
+                value,
+                file,
+                rowIndex,
+                fileOperations
+              )
+            } else if (file.type === 'dir') {
+              return renderOperation(
+                value,
+                file,
+                rowIndex,
+                dirOperations
+              )
+            } else {
+              throw new Error('unknown file type')
+            }
+          }}
         />
       </Table>
       <RenameModal
@@ -207,6 +212,7 @@ const FilesTable = ({ data, updatePath }: Props) => {
         bindings={deleteModalBindings}
         fileName={fileName}
       />
+      <MoveDrawer />
     </>
   )
 }

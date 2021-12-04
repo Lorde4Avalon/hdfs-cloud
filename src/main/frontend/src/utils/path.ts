@@ -1,16 +1,15 @@
-import { useQuery } from 'react-query'
-import { useAuth } from '../context/auth-context'
-import { client } from './api-client'
+import React from 'react'
+import { QueryOptions, useQuery } from 'react-query'
+import { client, queryCache, queryClient } from './api-client'
 
-const getPathConfig = (path: string) => ({
-  queryKey: path,
+export const getPathQueryConfig = (path: string) => ({
+  queryKey: ['pathQuery', path],
   queryFn: () => client(`/path?path=${encodeURIComponent(path)}`),
-})
+} as QueryOptions)
 
 export function usePathQuery(path: string) {
-  const { user } = useAuth()
-  const result = useQuery(getPathConfig(`${user!.username}/` + path))
-  return { ...result, files: result.data }
+  const result = useQuery(getPathQueryConfig(path))
+  return { ...result, files: result.data as HdfsFile[] }
 }
 
 export function downloadFile(path: string) {
@@ -26,4 +25,18 @@ export function downloadFile(path: string) {
     document.body.removeChild(a)
     window.URL.revokeObjectURL(downloadURL)
   })
+}
+
+const getFileSearchConfig = (beginPath: string, key: string) =>
+  ({
+    queryKey: ['fileSearch', beginPath, key],
+    queryFn: () => client(`search?beginPath=${beginPath}&key=${key}`),
+    enabled: Boolean(key),
+    retry: false,
+    cacheTime: 0,
+  } as QueryOptions)
+
+export function useFileSearch(beginPath: string, key: string) {
+  const result = useQuery(getFileSearchConfig(beginPath, key))
+  return { ...result, files: result.data as HdfsFile[] }
 }

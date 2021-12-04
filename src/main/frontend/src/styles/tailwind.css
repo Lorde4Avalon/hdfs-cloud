@@ -14,7 +14,17 @@
 
 /* Your own custom utilities */
 
+/* Geist UI fix */
+
 #geist-ui-tooltip .inner {
   font-size: 0.875rem;
   white-space: nowrap;
+}
+
+.tooltip-content {
+  z-index: 2000 !important;
+}
+
+.tooltip svg {
+  position: relative;
 }

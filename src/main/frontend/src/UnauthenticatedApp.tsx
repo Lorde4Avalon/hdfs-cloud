@@ -15,6 +15,8 @@ function LoginForm({
 }) {
   const { isLoading, isError, error, run } = useAsync()
 
+  const { autoFocusRef } = useInputFocus()
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const { username, password } = (e.target as any).elements
@@ -32,7 +34,7 @@ function LoginForm({
       <Modal.Content className="!px-12">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Input
-            ref={useInputFocus()}
+            ref={autoFocusRef}
             name="username"
             width="100%"
             icon={<User />}
@@ -74,6 +76,7 @@ function RegisterForm({
   onSubmit: Function | null
 }) {
   const { isLoading, isError, error, run } = useAsync()
+  const { autoFocusRef } = useInputFocus()
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -91,7 +94,7 @@ function RegisterForm({
       <Modal.Content className="!px-12 !space-y-2">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Input
-            ref={useInputFocus()}
+            ref={autoFocusRef}
             name="username"
             width="100%"
             icon={<User />}

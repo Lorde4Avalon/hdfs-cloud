@@ -6,6 +6,7 @@ interface HdfsFile {
   modTime: number
   type: 'dir' | 'file'
   operation: 'more' | 'back'
+  path: string
 }
 
 interface User {

@@ -5,6 +5,7 @@ import { client } from '../utils/api-client'
 import FullScreenSpin from '../components/FullScreenSpin'
 import { useCookie } from 'react-use'
 import { useToasts } from '@geist-ui/react'
+import { AlertCircle, Frown } from '@geist-ui/react-icons'
 
 async function getUser(token: string | null) {
   let user = null
@@ -111,7 +112,16 @@ function AuthProvider(props: any) {
   }
 
   if (isError) {
-    return <div>{error.message}</div>
+    return (
+      <div className="h-screen w-screen grid place-items-center">
+        <div className="flex flex-col items-center space-y-4">
+          <AlertCircle size={48} />
+          <h2 className="text-xl">出错了</h2>
+          <p>请稍后再试</p>
+          <p className="text-sm">{error.message}</p>
+        </div>
+      </div>
+    )
   }
 
   throw new Error(`Unhandled status: ${status}`)
