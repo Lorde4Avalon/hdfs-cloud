@@ -38,10 +38,11 @@ public class HdfsController {
     private ServletContext servletContext;
 
     @GetMapping(value = "/path", produces = "application/json")
-    public ResponseEntity<?> list(String path) throws IOException {
-        if (path == null) path = "/";
+    public ResponseEntity<?> list(String path, HttpServletRequest request) throws IOException {
+        val user = userService.getUserByToken(CookieUtil.resolveCookie(request));
+        if (path == null) path = "/" + user.getUsername();
         try {
-            val fileStatuses = hdfsService.getDirectory(path);
+            val fileStatuses = hdfsService.getDirectory("/" + user.getUsername() + path);
             val hdfsFiles = new ArrayList<HdfsFileEntity>();
             if (fileStatuses != null) {
                 for (FileStatus fileStatus : fileStatuses) {
@@ -50,6 +51,7 @@ public class HdfsController {
                             .type(fileStatus.isDirectory() ? "dir" : "file")
                             .len(fileStatus.getLen())
                             .modTime(fileStatus.getModificationTime())
+                            .path(fileStatus.getPath().toString().replace(HdfsService.HDFS_PATH + user.getUsername(), ""))
                             .build();
                     hdfsFiles.add(tmp);
                 }
@@ -128,7 +130,7 @@ public class HdfsController {
     }
 
     @RequestMapping(value = "/download")
-    public ResponseEntity<?> download(String path   , HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ResponseEntity<?> download(String path, HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (path == null || path.isEmpty()) {
             return new ResponseEntity<>(MessageEntity.builder().text("文件路径不能为空"), null, HttpStatus.FORBIDDEN);
         }
@@ -164,6 +166,44 @@ public class HdfsController {
             e.printStackTrace();
             return new ResponseEntity<>(MessageEntity.builder().text("未知错误"), null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> search(String beginPath, String key, HttpServletRequest request) throws IOException {
+        if (beginPath == null || beginPath.isEmpty()) {
+            return new ResponseEntity<>(MessageEntity.builder().text("文件路径不能为空"), null, HttpStatus.FORBIDDEN);
+        }
+
+        if (key == null || key.isEmpty()) {
+            return new ResponseEntity<>(MessageEntity.builder().text("关键字不能为空"), null, HttpStatus.FORBIDDEN);
+        }
+
+        val user = userService.getUserByToken(CookieUtil.resolveCookie(request));
+
+        val fileStatusArrayList = hdfsService.searchFile(user.getUsername() + '/' + beginPath, key);
+        val hdfsFileList = new ArrayList<HdfsFileEntity>();
+
+        if (fileStatusArrayList != null) {
+            fileStatusArrayList.forEach(fileStatus -> {
+                val hdfsFile = HdfsFileEntity.builder()
+                        .name(fileStatus.getPath().getName())
+                        .type(fileStatus.isDirectory() ? "dir" : "file")
+                        .len(fileStatus.getLen())
+                        .modTime(fileStatus.getModificationTime())
+                        .path(fileStatus.getPath().toString().replace(HdfsService.HDFS_PATH + user.getUsername(), ""))
+                        .build();
+                hdfsFileList.add(hdfsFile);
+            });
+        }
+
+        return new ResponseEntity<>(hdfsFileList, HttpStatus.OK);
+
+//        try {
+////            return new ResponseEntity<>(results, HttpStatus.OK);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return new ResponseEntity<>(MessageEntity.builder().text("未知错误"), null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
     }
 
 }

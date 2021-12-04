@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,41 @@ import org.springframework.stereotype.Service;
 @Service
 public class HdfsService {
 
-    private final String HDFS_PATH = "hdfs://localhost:9000/es/";
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+
+    public static final String HDFS_PATH = "hdfs://localhost:9000/es/";
     private final String HDFS_USER = "fronz";
 
+    /**
+     * 搜索 HDFS 中的文件
+     *
+     * @param beginPath 开始搜索的路径
+     * @param key       搜索关键字
+     * @return FileStatus[]
+     * @throws IOException
+     */
+    public ArrayList<FileStatus> searchFile(String beginPath, String key) throws IOException {
+        System.setProperty("HADOOP_USER_NAME", HDFS_USER);
+        val conf = new Configuration();
+        val fs = FileSystem.get(URI.create(HDFS_PATH + beginPath), conf);
+        val fileStatusListIterator = fs.listFiles(new Path("/"), true);
+        val results = new ArrayList<FileStatus>();
+        while (fileStatusListIterator.hasNext()) {
+            val fileStatus = fileStatusListIterator.next();
+            if (fileStatus.getPath().getName().contains(key)) {
+                results.add(fileStatus);
+            }
+        }
+        return results;
+    }
 
     /**
      * 上传文件

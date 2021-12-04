@@ -10,4 +10,5 @@ public class HdfsFileEntity {
     private long len;
     private long modTime;
     private String type;
+    private String path;
 }
