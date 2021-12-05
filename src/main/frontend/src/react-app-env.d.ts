@@ -13,6 +13,7 @@ interface User {
   id: number
   username: string
   token: string
+  nickname: string
 }
 
 interface Operation {
@@ -26,4 +27,10 @@ type OperationModalProps = Omit<
   'currentRef'
 > & {
   fileName: HdfsFile['name']
+}
+
+interface Tab {
+  label: string
+  value: string
+  content: React.ReactComponentElement
 }

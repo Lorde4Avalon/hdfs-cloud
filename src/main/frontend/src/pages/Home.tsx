@@ -1,4 +1,4 @@
-import { ButtonGroup, Loading } from '@geist-ui/react'
+import { Breadcrumbs, ButtonGroup, Loading } from '@geist-ui/react'
 import React from 'react'
 import { useHash } from 'react-use'
 import FilesTable from '../components/FileTable'
@@ -17,7 +17,7 @@ const Home = () => {
   const isEmpty = !files || files.length === 0
 
   const sortedFiles: HdfsFile[] = React.useMemo(
-    () => isEmpty ? [] : sortFiles(files),
+    () => (isEmpty ? [] : sortFiles(files)),
     [files, isEmpty]
   )
 
@@ -33,7 +33,20 @@ const Home = () => {
   return (
     <div>
       <div className="flex justify-between mb-8">
-        <h1 className="text-2xl">我的文件</h1>
+        <Breadcrumbs>
+          <Breadcrumbs.Item href="/#/">我的文件</Breadcrumbs.Item>
+          {(() => {
+            const pathArr = path.split('/').filter(Boolean)
+
+            return pathArr.map((p, i) => (
+              <Breadcrumbs.Item
+                href={'/#/' + pathArr.slice(0, i + 1).join('/')}
+                key={`${p}-${i}`}>
+                {p}
+              </Breadcrumbs.Item>
+            ))
+          })()}
+        </Breadcrumbs>
         <ButtonGroup>
           <UploadFileButton />
           <CreateDirectoryButton />

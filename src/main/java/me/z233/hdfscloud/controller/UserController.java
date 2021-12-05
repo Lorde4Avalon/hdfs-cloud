@@ -2,6 +2,7 @@ package me.z233.hdfscloud.controller;
 
 import lombok.val;
 import me.z233.hdfscloud.entity.MessageEntity;
+import me.z233.hdfscloud.entity.UserEntity;
 import me.z233.hdfscloud.service.EncryptorService;
 import me.z233.hdfscloud.service.HdfsService;
 import me.z233.hdfscloud.service.UserService;
@@ -93,4 +94,18 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @PutMapping("/user")
+    public ResponseEntity<?> updateUser(@RequestBody Map<String, String> userForm, HttpServletRequest request) {
+        val token = CookieUtil.resolveCookie(request);
+        val user = userService.getUserByToken(token);
+
+        userForm.forEach((k, v) -> {
+            if (k.equals("nickname") && !v.trim().isEmpty()) {
+                user.setNickname(v);
+            }
+        });
+
+        userService.updateUser(user);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 }

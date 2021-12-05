@@ -39,8 +39,16 @@ public class UserService {
         return newUser;
     }
 
+    public boolean updateUser(UserEntity user) {
+        return userMapper.updateUser(user);
+    }
+
     public boolean updateTokenById(int id, String token) {
         return userMapper.updateTokenById(id, token);
+    }
+
+    public boolean updateNicknameById(int id, String nickname) {
+        return userMapper.updateNicknameById(id, nickname);
     }
 
     public boolean updatePasswordById(int id, String password) {

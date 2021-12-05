@@ -79,7 +79,10 @@ const FilesTable = ({ data }: Props) => {
     setVisible: setRenameModalVisible,
     bindings: renameModalBindings,
   } = useModal()
-  const [fileName, setFileName] = React.useState('')
+  const [moveDrawerVisible, setMoveDrawerVisible] =
+    React.useState(false)
+  const [selectedFile, setSelectedFile] =
+    React.useState<HdfsFile | null>()
   const [path, setPath] = usePath()
 
   const {
@@ -89,10 +92,10 @@ const FilesTable = ({ data }: Props) => {
   } = useModal()
 
   renameModalBindings.onClose = () => (
-    setFileName(''), setRenameModalVisible(false)
+    setSelectedFile(null), setRenameModalVisible(false)
   )
   deleteModalBindings.onClose = () => (
-    setFileName(''), setDeleteModalVisible(false)
+    setSelectedFile(null), setDeleteModalVisible(false)
   )
 
   if (!data) data = []
@@ -104,7 +107,7 @@ const FilesTable = ({ data }: Props) => {
         modTime: 0,
         type: 'dir',
         operation: 'back',
-        path: ''
+        path: '',
       },
       ...data,
     ]
@@ -136,7 +139,7 @@ const FilesTable = ({ data }: Props) => {
   const renameOperation: Operation = {
     title: '重命名',
     onClick: (rowData: HdfsFile) => {
-      setFileName(rowData.name)
+      setSelectedFile(rowData)
       setRenameModalVisible(true)
     },
   }
@@ -145,17 +148,28 @@ const FilesTable = ({ data }: Props) => {
     title: '删除',
     className: 'text-red-600',
     onClick: (rowData: HdfsFile) => {
-      setFileName(rowData.name)
+      setSelectedFile(rowData)
       setDeleteModalVisible(true)
+    },
+  }
+
+  const moveOperation: Operation = {
+    title: '移至',
+    onClick: (file: HdfsFile) => {
+      setSelectedFile(file)
+      
+      setMoveDrawerVisible(true)
     },
   }
 
   const fileOperations: Operation[] = [
     downloadOperation,
+    moveOperation,
     renameOperation,
     deleteOperation,
   ]
   const dirOperations: Operation[] = [
+    moveOperation,
     renameOperation,
     deleteOperation,
   ]
@@ -204,15 +218,19 @@ const FilesTable = ({ data }: Props) => {
         visible={renameModalVisible}
         setVisible={setRenameModalVisible}
         bindings={renameModalBindings}
-        fileName={fileName}
+        fileName={selectedFile ? selectedFile.name : ''}
       />
       <DeleteFileModal
         visible={deleteModalVisible}
         setVisible={setDeleteModalVisible}
         bindings={deleteModalBindings}
-        fileName={fileName}
+        fileName={selectedFile ? selectedFile.name : ''}
       />
-      <MoveDrawer />
+      <MoveDrawer
+        targetFile={selectedFile!}
+        visible={moveDrawerVisible}
+        setVisible={setMoveDrawerVisible}
+      />
     </>
   )
 }

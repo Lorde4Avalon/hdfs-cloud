@@ -21,6 +21,12 @@ public interface UserMapper {
     @Update("UPDATE user SET token = #{token} WHERE id = #{id}")
     boolean updateTokenById(@Param("id") int id, @Param("token") String token);
 
+    @Update("UPDATE user SET nickname = #{nickname} WHERE id = #{id}")
+    boolean updateNicknameById(@Param("id") int id, @Param("nickname") String nickname);
+
     @Update("UPDATE user SET password = #{password} WHERE id = #{id}")
     boolean updatePasswordById(@Param("id") int id, @Param("password") String password);
+
+    @Update("UPDATE user SET nickname= #{user.nickname} WHERE id = #{user.id}")
+    boolean updateUser(@Param("user") UserEntity user);
 }

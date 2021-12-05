@@ -46,7 +46,7 @@ const Header = () => {
       </a>
       <div className="flex items-center space-x-2">
         <Tag type="default" invert>
-          {user!.username}
+          {user?.nickname ? user.nickname : user!.username}
         </Tag>
         <Popover className="popover" content={popoverContent}>
           <ChevronUpDown size="18" className="cursor-pointer" />

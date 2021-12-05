@@ -22,7 +22,10 @@ function FileOperationsPopover({
     <ul>
       {operations.map(({ title, className, onClick }) => (
         <li
-          onClick={() => onClick(file)}
+          onClick={() => {
+            setVisible(false)
+            onClick(file)
+          }}
           key={title}
           className="text-[color:#444444] text-sm 
           cursor-pointer select-none relative py-2 pl-3 

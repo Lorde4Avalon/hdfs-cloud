@@ -1,7 +1,7 @@
 import React from 'react'
 import { useAsync } from '../utils/hooks'
 import * as auth from '../auth-provider'
-import { client } from '../utils/api-client'
+import { client, queryClient } from '../utils/api-client'
 import FullScreenSpin from '../components/FullScreenSpin'
 import { useCookie } from 'react-use'
 import { useToasts } from '@geist-ui/react'
@@ -10,7 +10,10 @@ import { AlertCircle, Frown } from '@geist-ui/react-icons'
 async function getUser(token: string | null) {
   let user = null
   if (token) {
-    user = await client('user')
+    user = await queryClient.fetchQuery({
+      queryKey: 'user',
+      queryFn: () => client('user'),
+    })
   }
   return user
 }

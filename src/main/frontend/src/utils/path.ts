@@ -1,15 +1,19 @@
 import React from 'react'
 import { QueryOptions, useQuery } from 'react-query'
 import { client, queryCache, queryClient } from './api-client'
+import { sortFiles } from './helper'
 
-export const getPathQueryConfig = (path: string) => ({
-  queryKey: ['pathQuery', path],
-  queryFn: () => client(`/path?path=${encodeURIComponent(path)}`),
-} as QueryOptions)
+export const getPathQueryConfig = (path: string) =>
+  ({
+    queryKey: ['pathQuery', path],
+    queryFn: () => client(`/path?path=${encodeURIComponent(path)}`),
+  } as QueryOptions)
 
 export function usePathQuery(path: string) {
   const result = useQuery(getPathQueryConfig(path))
-  return { ...result, files: result.data as HdfsFile[] }
+  const files = result.data as HdfsFile[]
+  const sortedFiles = sortFiles(files)
+  return { ...result, files: sortedFiles as HdfsFile[] }
 }
 
 export function downloadFile(path: string) {
