@@ -15,7 +15,7 @@ function FileOperationsPopover({
 
   const handleClick = (e: React.MouseEvent<any, MouseEvent>) => {
     e.stopPropagation()
-    setVisible(true)
+    setVisible(!visible)
   }
 
   const popoverContent = () => (
